@@ -1,12 +1,12 @@
 use std::str::CharIndices;
+use crate::utils::iter::{
+    MorePeekable,
+    MorePeekableIter,
+};
 use self::token::{
     Span,
     Token,
     TokenKind, IntBase,
-};
-use crate::utils::iter::{
-    MorePeekable,
-    MorePeekableIter,
 };
 
 pub mod token;
@@ -41,9 +41,7 @@ impl<'a> Iterator for Lexer<'a> {
             ('/', _) => self.trim_start_one(TokenKind::Slash),
 
             // Identifier
-            (c, _) if c.is_ascii_alphabetic() => self.trim_start_with(TokenKind::Ident, |c| {
-                c.is_ascii_alphanumeric() || c == '_'
-            }),
+            (c, _) if c.is_ascii_alphabetic() => self.trim_identifier(),
 
             // Integer
             ('0', 'x') => self.trim_integer(IntBase::Hexadecimal, true),
@@ -58,6 +56,12 @@ impl<'a> Iterator for Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
+    fn trim_identifier(&mut self) -> Option<Token<'a>> {
+        self.trim_start_with(TokenKind::Identifier, |c| {
+            c.is_ascii_alphanumeric() || c == '_'
+        })
+    }
+
     fn trim_integer(&mut self, base: IntBase, has_prefix: bool) -> Option<Token<'a>> {
         let span = {
             let start = self.peek_curr_offset()?;

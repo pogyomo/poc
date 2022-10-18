@@ -35,7 +35,7 @@ pub enum TokenKind {
 
     // Literal
     /// Identifier
-    Ident,
+    Identifier,
     /// Integer
     Integer(IntBase),
 
