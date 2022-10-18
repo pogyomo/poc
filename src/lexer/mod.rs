@@ -1,10 +1,8 @@
-#![allow(dead_code)]
-
 use std::str::CharIndices;
 use self::token::{
     Span,
     Token,
-    TokenKind,
+    TokenKind, IntBase,
 };
 use crate::utils::iter::{
     MorePeekable,
@@ -32,6 +30,10 @@ impl<'a> Iterator for Lexer<'a> {
         let curr = self.peek_curr_char()?;
         let next = self.peek_next_char().unwrap_or('\0');
         match (curr, next) {
+            // Two character
+            ('=', '=') => self.trim_start_two(TokenKind::EQ),
+            ('!', '=') => self.trim_start_two(TokenKind::NE),
+
             // One character
             ('+', _) => self.trim_start_one(TokenKind::Plus),
             ('-', _) => self.trim_start_one(TokenKind::Minus),
@@ -44,13 +46,30 @@ impl<'a> Iterator for Lexer<'a> {
             }),
 
             // Integer
-            (c, _) if c.is_ascii_digit() => self.trim_start_with(TokenKind::Integer, |c| {
-                c.is_ascii_digit()
-            }),
+            ('0', 'x') => self.trim_integer(IntBase::Hexadecimal, true),
+            ('0', 'o') => self.trim_integer(IntBase::Octadecimal, true),
+            ('0', 'b') => self.trim_integer(IntBase::Binary, true),
+            (c, _) if c.is_ascii_digit() => self.trim_integer(IntBase::Decimal, false),
 
             // Invalid
             _ => self.trim_start_one(TokenKind::Invalid),
         }
+    }
+}
+
+impl<'a> Lexer<'a> {
+    fn trim_integer(&mut self, base: IntBase, has_prefix: bool) -> Option<Token<'a>> {
+        let span = {
+            let start = self.peek_curr_offset()?;
+            if has_prefix {
+                self.next();
+                self.next();
+            }
+            self.next_while(|c| c.is_digit(base.into()) || c == '_');
+            let end = self.peek_curr_offset()?;
+            Span::new(&self.input, start, end)
+        };
+        Some(Token::new(TokenKind::Integer(base), span))
     }
 }
 

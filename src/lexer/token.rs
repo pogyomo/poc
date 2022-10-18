@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 /// An token with it's infomation
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Token<'a> {
@@ -7,7 +5,7 @@ pub struct Token<'a> {
     kind: TokenKind,
 
     /// String span which token use
-    pub span: Span<'a>,
+    span: Span<'a>,
 }
 
 impl<'a> Token<'a> {
@@ -29,15 +27,41 @@ pub enum TokenKind {
     /// /
     Slash,
 
+    // Two-character token
+    /// ==
+    EQ,
+    /// !=
+    NE,
+
     // Literal
     /// Identifier
     Ident,
     /// Integer
-    Integer,
+    Integer(IntBase),
 
     // Special
     /// Invalid character
     Invalid,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum IntBase {
+    Binary,
+    Octadecimal,
+    Decimal,
+    Hexadecimal,
+}
+
+impl From<IntBase> for u32 {
+    fn from(base: IntBase) -> Self {
+        use IntBase::*;
+        match base {
+            Binary      => 02,
+            Octadecimal => 08,
+            Decimal     => 10,
+            Hexadecimal => 16,
+        }
+    }
 }
 
 /// Represent substring
@@ -57,10 +81,5 @@ impl<'a> Span<'a> {
     /// Create span
     pub fn new(string: &'a str, start: usize, end: usize) -> Span<'a> {
         Span { string, start, end }
-    }
-
-    /// Get substring
-    pub fn as_str(&self) -> &str {
-        &self.string[self.start..self.end]
     }
 }
