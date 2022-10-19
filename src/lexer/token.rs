@@ -2,10 +2,10 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Token<'a> {
     /// Type of this token
-    kind: TokenKind,
+    pub kind: TokenKind,
 
     /// String span which token use
-    span: Span<'a>,
+    pub span: Span<'a>,
 }
 
 impl<'a> Token<'a> {
@@ -26,6 +26,8 @@ pub enum TokenKind {
     Star,
     /// /
     Slash,
+    /// ;
+    Semicolon,
 
     // Two-character token
     /// ==
@@ -68,18 +70,23 @@ impl From<IntBase> for u32 {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Span<'a> {
     /// Original string for creating substring
-    string: &'a str,
+    pub string: &'a str,
 
     /// Start index of substring
-    start: usize,
+    pub start: usize,
 
     /// End index of substring
-    end: usize,
+    pub end: usize,
 }
 
 impl<'a> Span<'a> {
     /// Create span
     pub fn new(string: &'a str, start: usize, end: usize) -> Span<'a> {
         Span { string, start, end }
+    }
+
+    /// To substring
+    pub fn as_str(&self) -> &'a str {
+        &self.string[self.start..self.end]
     }
 }

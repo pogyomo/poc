@@ -39,6 +39,7 @@ impl<'a> Iterator for Lexer<'a> {
             ('-', _) => self.trim_start_one(TokenKind::Minus),
             ('*', _) => self.trim_start_one(TokenKind::Star),
             ('/', _) => self.trim_start_one(TokenKind::Slash),
+            (';', _) => self.trim_start_one(TokenKind::Semicolon),
 
             // Identifier
             (c, _) if c.is_ascii_alphabetic() => self.trim_identifier(),

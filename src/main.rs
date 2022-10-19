@@ -1,4 +1,5 @@
 use lexer::Lexer;
+use parser::Parser;
 
 mod lexer;
 mod parser;
@@ -8,7 +9,6 @@ fn main() {
     let mut input = String::new();
     std::io::stdin().read_line(&mut input).unwrap();
     let lexer = Lexer::new(input.as_str());
-    for a in lexer {
-        println!("{:?}", a);
-    }
+    let mut parse = Parser::new(lexer);
+    println!("{:#?}", parse.parse_stmt());
 }
